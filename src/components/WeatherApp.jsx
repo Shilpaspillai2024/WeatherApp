@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const WeatherApp = () => {
   const [city, setCity] = useState("");
   const [weatherData, setWeatherData] = useState(null);
+  const [error, setError] = useState("");
 
   const API_KEY = "036a51ad71d89b253205cb1629ec67ae";
 
@@ -14,16 +15,21 @@ const WeatherApp = () => {
         `http://api.weatherstack.com/current?access_key=${API_KEY}&query=${city}`
       );
       const data = await response.json();
-
       console.log(data);
-      setWeatherData(data);
+      if (data.error) {
+        setError(data.error.info || "something went wrong");
+        setWeatherData(null);
+      } else {
+        setWeatherData(data);
+        setError("");
+      }
     } catch (error) {
-      console.error("Something went wrong:", error);
+      setError("something went wrong");
     }
   };
 
   return (
-  <div className="fixed inset-0 bg-gradient-to-br from-blue-200 to-indigo-600 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-200 to-indigo-600 flex items-center justify-center p-4">
       <div className="bg-white bg-opacity-10 backdrop-blur-md p-8 rounded-xl shadow-lg max-w-md w-full text-white">
         <h1 className="text-4xl font-bold text-center mb-6">🌦️ Weather App</h1>
 
@@ -41,12 +47,17 @@ const WeatherApp = () => {
             Search
           </button>
         </div>
+        {error && <p className="text-red-800">{error}</p>}
 
         {weatherData && (
           <div className="bg-white bg-opacity-20 p-6 rounded-lg shadow-inner text-center">
-            <h3 className="text-2xl font-bold mb-2">{weatherData.location.name}</h3>
+            <h3 className="text-2xl font-bold mb-2">
+              {weatherData.location.name}
+            </h3>
             <p className="text-xl">{weatherData.current.temperature}&#176;C</p>
-            <p className="italic">{weatherData.current.weather_descriptions[0]}</p>
+            <p className="italic">
+              {weatherData.current.weather_descriptions[0]}
+            </p>
           </div>
         )}
       </div>
